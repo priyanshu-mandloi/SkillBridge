@@ -14,14 +14,16 @@ function toObjectId(id: string) {
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  context: { params: Promise<{ id: string }> },
 ) {
   try {
     const user = getAuthUser(req);
     if (!user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const _id = toObjectId(params.id);
+    const { id } = await context.params;
+
+    const _id = toObjectId(id);
     if (!_id)
       return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
 
@@ -49,14 +51,14 @@ export async function GET(
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  context: { params: Promise<{ id: string }> },
 ) {
   try {
     const user = getAuthUser(req);
     if (!user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { id } = await params;
+    const { id } = await context.params;
 
     const _id = toObjectId(id);
     if (!_id)
@@ -89,7 +91,6 @@ export async function PUT(
       );
     }
 
-    // fetch updated doc
     const updatedProject = await db.collection("projects").findOne({ _id });
 
     return NextResponse.json({
@@ -108,14 +109,14 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  context: { params: Promise<{ id: string }> },
 ) {
   try {
     const user = getAuthUser(req);
     if (!user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { id } = await params;
+    const { id } = await context.params;
 
     const _id = toObjectId(id);
     if (!_id)
